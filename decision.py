@@ -26,13 +26,15 @@ def is_all_white(lidar_obj: lidar) -> int:
 
 
 def lager_radius(lidar_obj: lidar) -> int:
-    lidar_obj.find_the_best_r()
+    r = lidar_obj.getter_single('r')
+    lidar_obj.setter('r', r*2)
+    lidar_obj.clear_scan_result()
     return 0
 
 
 def scan_and_is_wander(lidar_obj: lidar) -> int:
-    lidar_obj.scan(60, 'b')
-    if(lidar_obj.getter_single('wander') >= 5):
+    lidar_obj.scan(60, 'm')
+    if(lidar_obj.getter_single('wander') > 3):
         lidar_obj.setter('wander', 0)
         return 1
     else:

@@ -18,7 +18,7 @@ class Vector_map():
         self._this.create_circle(*input)
 
     def create_poly(self, input: list) -> None:
-        self._this.create_poly(input)
+        self._this.create_poly(*input)
 
     def create_border(self, input: list) -> None:
         if(len(input) != 2):
@@ -34,33 +34,23 @@ class Vector_map():
     def readfile(self, filename: str, select_type="relative") -> None:
         self._this.readfile(filename, select_type)
 
-    def plot_map(self, ax, alpha=1, offset=0) -> None:
+    def plot_map(self, ax, alpha=1) -> None:
         temp_list = self._this.get_shape_list()
-        blk = "black"
-        gray = "gray"
-
-        i = 0
 
         for item in temp_list:
-            if(i >= len(temp_list)-offset):
-                c = gray
-            else:
-                c = blk
-
             if(isinstance(item, collis.Poly)):
                 data = item.get_data()
                 data = nparray(data)
                 data.resize((int(len(data)/2), 2))
-                ax.add_patch(patches.Polygon(data, fc=c, alpha=alpha))
+                ax.add_patch(patches.Polygon(data, fc='black', alpha=alpha))
             if(isinstance(item, collis.Circle)):
                 data = item.get_data()
                 ax.add_patch(patches.Circle(
-                    data[1:], data[0], fc=c, alpha=alpha))
+                    data[1:], data[0], fc='black', alpha=alpha))
             if(isinstance(item, collis.Line)):
                 data = item.get_data()
                 ax.plot([data[0], data[2]], [data[1], data[3]],
-                        color=c, alpha=alpha)
-            i += 1
+                        color='black', alpha=alpha)
 
     def scan(self, curr_x, curr_y, r, maxangle, next, get_points=False):
         start = time.time()
@@ -100,8 +90,7 @@ if __name__ == "__main__":
 
     vvv = Vector_map()
     vvv.create_border([10, 10])
-
-    vvv.create_poly([5, 5, 8, 8, 6, 6])
+    vvv.create_circle([5, 5, 5])
     vvv.plot_map(ax)
     plt.show()
     pass

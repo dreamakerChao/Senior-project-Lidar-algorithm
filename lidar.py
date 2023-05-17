@@ -50,7 +50,6 @@ class lidar():
         self._nextsteps_list = None
         self._history = [(curr_point[0], curr_point[1], radius)]
         self._wave = []
-        self._offset = 0
         # -----
         if(input_map == None):
             if(filename == None):
@@ -138,7 +137,7 @@ class lidar():
             return False
 
     def plot_map(self, ax, alpha=1):
-        self._map.plot_map(ax, alpha,offset=self._offset)
+        self._map.plot_map(ax, alpha)
 
     def plot_his(self, ax, alpha=1):
         # plot map
@@ -273,15 +272,7 @@ class lidar():
 
             d_min = min(wave)
 
-            curr_range = Circle([self._radius, *curr])
-            hit_his=False
-
-            for item in self._history[:-1]:
-                temp=list(item[:-1])
-                if(curr_range.point_inside_range(temp)):
-                    hit_his=True
-
-            if(slope1*slope2 < 0 and hit_his):
+            if(slope1*slope2 < 0):
                 self._wander += 1
 
             if(new_d <= d_min):
@@ -330,6 +321,18 @@ class lidar():
                 if(not curr_range.in_region(temp)):
                     self._map.create_circle([item[2], item[0], item[1]])
 
+    def find_the_best_r(self):
+        large = self._initial_r*3
+        while(1):
+            self.scan()
+            if(self._state == 'b'):
+                self._radius -= large
+            elif(self._state == 'n' and len(self._area_list)/2 == 1):
+                return self._radius
+
+            else:
+                self._radius += large
+
     def clear_scan_result(self):
         self._area_list = []
         self._nextsteps_list = []
@@ -338,50 +341,3 @@ class lidar():
         self.score = []
         self.look_backward = []
         self._state = None
-
-    def find_the_best_r(self):
-        r_reg=self._radius
-        large = 0.2
-        size=self._map.get_size()
-        max_size=max(size)
-        i=0
-
-        while(1):
-            self.scan(next='b')
-            if(not self.scan_one_line(self._dest_point)):
-                self.clear_scan_result()
-                self.set_next_go(self._dest_point)
-                self.go()
-                return
-
-            elif(self._state == 'b'):
-                self._radius -= large
-
-            elif(self._state == 'n' and len(self._nextsteps_list) == 1):
-                temp_r=self._radius
-                self._radius=r_reg
-                area=[]
-
-                for item in self._area_list:
-                    area.append(item[0])
-                    area.append(item[1])
-                area.append(self._curr_point[0])
-                area.append(self._curr_point[1])
-
-                self._map.create_poly(area)
-                self._offset+=1
-
-                self.set_next_go(*self._nextsteps_list)
-                self.go()
-                self.clear_scan_result()
-                return
-
-            else:
-                if(self._radius + large > max_size):
-                    self._radius=r_reg
-                    self.scan(next='b')
-                else:
-                    self._radius += 0.2
-
-
-        

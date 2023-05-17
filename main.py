@@ -1,6 +1,7 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import os
+import sys
 # -----------------------
 from decision_tree import lidar_Controller
 from lidar import lidar
@@ -13,7 +14,7 @@ def go_thru(input_map, start, destination, radius, ax, ax2, ax3, canvas, canvas2
     end_type = "None"
 
     while(not robot.if_in_dest()):
-        if(robot.run_times_equalmore_than(100)):
+        if(robot.run_times_equalmore_than(150)):
             print("Time Out!")
             end_type = "time_out"
             break
@@ -56,7 +57,7 @@ def go_step_by_step(lidar_obj: lidar, controller: lidar_Controller, ax, ax2, ax3
         lidar_obj.plot_wave(ax3)
         canvas_draw(canvas, canvas2, canvas3)
         return "done"
-    elif(lidar_obj.run_times_equalmore_than(100)):
+    elif(lidar_obj.run_times_equalmore_than(150)):
         plot_the_final(ax2, lidar_obj, "time_out")
         lidar_obj.plot_wave(ax3)
         canvas_draw(canvas, canvas2, canvas3)
@@ -73,7 +74,7 @@ def go_step_by_step(lidar_obj: lidar, controller: lidar_Controller, ax, ax2, ax3
         return lidar_obj
 
 
-def just_go(start, destination, radius, save=False, vmap_obj=None, file=None, ax=None, ax3=None, fig=None, savename=None, folder_name=None, rtn_step=False):
+def just_go(start, destination, radius, save=False, vmap_obj=None, file=None, ax=None, ax3=None, fig=None, savename=None, folder_name=None, rtn_step=False, num=150):
     Controller = lidar_Controller()
 
     if(vmap_obj != None):
@@ -84,7 +85,7 @@ def just_go(start, destination, radius, save=False, vmap_obj=None, file=None, ax
     end_type = "None"
 
     while(not robot.if_in_dest()):
-        if(robot.run_times_equalmore_than(100)):
+        if(robot.run_times_equalmore_than(num)):
             print("Time Out!")
             end_type = "time_out"
             break
@@ -103,7 +104,12 @@ def just_go(start, destination, radius, save=False, vmap_obj=None, file=None, ax
     print(f"dis={dis}\n")
 
     if(save and fig != None):
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, 'frozen', False):
+            # Running as compiled executable
+            script_dir = os.path.dirname(sys.executable)
+        else:
+            # Running as a script
+            script_dir = os.path.dirname(os.path.abspath(__file__))
 
         if(end_type == "done"):
             fig.savefig(

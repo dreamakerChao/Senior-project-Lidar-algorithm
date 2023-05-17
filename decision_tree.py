@@ -58,7 +58,7 @@ class Control_unit():
 
     def traverse(self, node, data):
         if node is not None:
-            print(node.fun.__name__)
+            # print(node.fun.__name__)
             result = node.fun(data)
             if result == 0:
                 self.traverse(node.left, data)
